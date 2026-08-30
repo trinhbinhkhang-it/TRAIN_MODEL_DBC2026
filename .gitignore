@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Data & Models (large files)
+data/
+checkpoints/
+model_files/
+logs/
+*.pth
+*.onnx
+*.tflite
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Colab/Notebooks
+*.ipynb_checkpoints/
+
+# DeepfakeBench submodule (clone separately)
+DeepfakeBench/
+
+# Large datasets
+*.zip
+*.tar.gz

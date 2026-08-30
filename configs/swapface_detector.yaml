@@ -1,0 +1,162 @@
+# SwapFace Detector Configuration
+# Based on DeepfakeBench framework
+
+# Model Configuration
+model:
+  name: "efficientnet_b0"  # Options: "sbi", "efficientnet_b0", "mobilenetv3_small"
+  backbone: "efficientnet_b0"
+  num_classes: 2
+  input_size: [224, 224]
+  pretrained: true
+  dropout: 0.2
+
+# Training Configuration
+training:
+  batch_size: 32
+  epochs: 10
+  learning_rate: 0.0001
+  weight_decay: 0.00001
+  optimizer:
+    type: "adamw"
+    adamw:
+      lr: 0.0001
+      weight_decay: 0.00001
+      betas: [0.9, 0.999]
+      eps: 0.00000001
+  scheduler: "cosine"
+  warmup_epochs: 2
+  label_smoothing: 0.1
+  mixup_alpha: 0.2
+  cutmix_alpha: 1.0
+  gradient_clip: 1.0
+  amp: false  # Disable AMP on CPU
+  num_workers: 0  # Windows multiprocessing issues
+  pin_memory: false
+
+# Dataset Configuration
+dataset:
+  name: "face_swap"
+  train_split: "train"
+  val_split: "val"
+  test_split: "test"
+  video_disjoint: true
+  identity_disjoint: true
+  datasets:
+    - "celeb_df_v2"
+    - "faceforensics++"
+    - "simswap"
+    - "faceshifter"
+    - "deepfacelab"
+  real_label: 0
+  fake_label: 1
+  face_crop_margin: 0.3
+  min_face_size: 64
+
+# Data Augmentation
+augmentation:
+  train:
+    - "random_horizontal_flip"
+    - "random_rotation:10"
+    - "color_jitter:0.2,0.2,0.2,0.1"
+    - "random_resized_crop:224"
+    - "normalize:imagenet"
+  val:
+    - "resize:256"
+    - "center_crop:224"
+    - "normalize:imagenet"
+  test:
+    - "resize:256"
+    - "center_crop:224"
+    - "normalize:imagenet"
+
+# Normalization (ImageNet stats)
+normalization:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+# Evaluation Configuration
+evaluation:
+  metrics:
+    - "roc_auc"
+    - "eer"
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "average_precision"
+    - "confusion_matrix"
+    - "inference_latency"
+    - "model_size"
+  threshold_range: [0.3, 0.9]
+  default_threshold: 0.5
+  temporal_smoothing:
+    method: "ema"  # Options: "ema", "sliding_window", "voting"
+    alpha: 0.3
+    window_size: 5
+    hysteresis:
+      high: 0.7
+      low: 0.3
+
+# Export Configuration
+export:
+  onnx:
+    opset_version: 17
+    dynamic_batch: false
+    input_name: "input"
+    output_name: "output"
+  tflite:
+    quantize_fp16: true
+    quantize_int8: true
+    representative_dataset_size: 100
+
+# Desktop App Configuration
+desktop:
+  camera_index: 0
+  target_fps: 30
+  inference_fps: 10
+  face_detector: "mediapipe"  # Options: "mediapipe", "mlkit", "yolov8"
+  face_detection_confidence: 0.7
+  quality_check:
+    min_face_size: 80
+    max_blur: 100
+    min_brightness: 30
+    max_brightness: 220
+  ui:
+    show_fps: true
+    show_fake_score: true
+    show_face_quality: true
+    bounding_box_thickness: 2
+
+# Android Configuration
+android:
+  target_api: 34
+  min_api: 26
+  model_input_size: [224, 224]
+  inference_fps: 8
+  frame_sampling: 3  # Process every Nth frame
+  face_detector: "mlkit"
+  min_face_size: 64
+  temporal_smoothing:
+    method: "ema"
+    alpha: 0.4
+    hysteresis_high: 0.75
+    hysteresis_low: 0.35
+  delegates:
+    - "cpu"
+    - "gpu"
+    - "nnap"
+  fallback_delegate: "cpu"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/swapface_detector.log"
+
+# Paths
+paths:
+  data_root: "data/"
+  checkpoints: "checkpoints/"
+  logs: "logs/"
+  exports: "model_files/"
+  reports: "reports/"

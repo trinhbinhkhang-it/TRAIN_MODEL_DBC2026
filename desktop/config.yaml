@@ -1,0 +1,64 @@
+# Desktop Application Configuration
+
+camera:
+  index: 0
+  width: 640
+  height: 480
+  fps: 30
+
+face_detector:
+  type: "mediapipe"  # Options: mediapipe, opencv_haar, opencv_dnn
+  min_detection_confidence: 0.7
+  min_tracking_confidence: 0.5
+  model_selection: 0  # 0: short-range (2m), 1: full-range (5m)
+
+model:
+  path: "model_files/swapface_detector_fp32.onnx"
+  input_size: [224, 224]
+  input_name: "input"
+  output_name: "output"
+  providers: ["CPUExecutionProvider"]  # Add "CUDAExecutionProvider" for GPU
+
+inference:
+  target_fps: 10
+  threshold: 0.5
+  hysteresis_high: 0.7
+  hysteresis_low: 0.3
+
+face_processing:
+  min_face_size: 80
+  max_blur: 100.0
+  min_brightness: 30
+  max_brightness: 220
+  crop_margin: 0.3
+
+temporal_smoothing:
+  method: "ema"  # Options: ema, sliding_window, voting
+  alpha: 0.3
+  window_size: 5
+  window_method: "mean"  # for sliding_window: mean or median
+  min_votes: 3  # for voting
+  hysteresis_high: 0.7
+  hysteresis_low: 0.3
+
+ui:
+  window_title: "SwapFace Detector - Realtime"
+  show_fps: true
+  show_fake_score: true
+  show_face_quality: true
+  show_threshold_slider: true
+  bounding_box_thickness: 2
+  font_scale: 0.6
+  colors:
+    real: [0, 255, 0]        # Green
+    suspicious: [0, 165, 255] # Orange
+    fake: [255, 0, 0]        # Red (BGR format for OpenCV)
+    unknown: [0, 255, 255]   # Yellow
+    text: [255, 255, 255]    # White
+    bg: [0, 0, 0]            # Black
+
+quality_check:
+  enabled: true
+  check_blur: true
+  check_brightness: true
+  check_size: true
